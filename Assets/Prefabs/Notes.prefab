@@ -184,8 +184,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   myAnim: {fileID: 7641992397448584350}
-  p_Range: 500
-  g_Range: 1000
+  p_Range: 100
+  g_Range: 150
   judgeSprite:
   - {fileID: 21300000, guid: aa0dc7c5dfc0e9a4ea77c15108570e05, type: 3}
   - {fileID: 21300000, guid: 2b985e70984f8e44c806f9cc24cc1398, type: 3}

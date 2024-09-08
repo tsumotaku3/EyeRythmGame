@@ -1,0 +1,4 @@
+repository "EyeRythmGame@takupon_unity@cloud"
+  path "/"
+    br "/main"
+    co "/main"

@@ -8,6 +8,8 @@ public class NotesSystem : MonoBehaviour
     public Animator myAnim;
     //判定
     public float p_Range,g_Range;
+    //判定領域
+    float JudgeZone;
     //判定文字のスプライト
     /// <summary>
     /// 0:Perfect
@@ -28,8 +30,31 @@ public class NotesSystem : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Setting.JudgeZone = 2;
-        myAnim.SetFloat("Speed",Setting.NoteSpeed * HighSpeed);
+        //難易度によって判定を変える
+        switch (NotesGenerator.difficulty)
+        {
+            case 0://easy
+                JudgeZone = 5;
+                g_Range = 2000;
+                p_Range = 1000;
+                break;
+            case 1://normal
+                JudgeZone = 4;
+                g_Range = 1500;
+                p_Range = 750;
+                break;
+            case 2://hard
+                JudgeZone = 3;
+                g_Range = 1000;
+                p_Range = 500;
+                break;
+            case 3://impossible
+                JudgeZone = 2;
+                g_Range = 500;
+                p_Range = 200;
+                break;
+        }
+        myAnim.SetFloat("Speed",SettingManager.NoteSpeed * HighSpeed);
         myAnim.SetFloat("JudgeRange", 1000 / g_Range);
         //AudioSorceを取得
         NotesAudioSorces = GameObject.FindGameObjectWithTag("NotesSEGenerator").GetComponents<AudioSource>();
@@ -46,7 +71,7 @@ public class NotesSystem : MonoBehaviour
             //マウスの座標を取得
             Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             //マウスに触れたか取得
-            if (true)//(Vector2.Distance(transform.position, mousePos) <= Setting.JudgeZone)
+            if (true)//(Vector2.Distance(transform.position, mousePos) <= JudgeZone)
             {
                 SpriteRenderer j_text = Instantiate(judgeText, transform.position, Quaternion.identity).GetComponent<SpriteRenderer>();
                 //速ければPerfect,遅ければGood

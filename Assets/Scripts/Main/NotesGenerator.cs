@@ -1,11 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using System.IO;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using UnityEditor.SearchService;
-using UnityEngine.SceneManagement;
+using UnityEngine;
+using UnityEngine.AddressableAssets;
+using System.Threading;
+using System.Threading.Tasks;
 
 public class NotesGenerator : MonoBehaviour
 {
@@ -20,10 +20,13 @@ public class NotesGenerator : MonoBehaviour
     //リザルト
     public static int[] result = new int[3];
 
+    //楽曲の番号(3ケタ)
+    public static string musicNum;
+    //難易度
+    public static int difficulty;
+
     //ノーツのプレハブ
     public GameObject notesPre;
-    //譜面のファイルパス
-    public string scorePass;
     //譜面のcsvを格納する
     List<string[]> notes = new List<string[]>();
     //ノーツの生成順
@@ -31,33 +34,32 @@ public class NotesGenerator : MonoBehaviour
 
     //AudioSorce
     AudioSource myAudioSorce;
+    //曲
+    AudioClip music;
+
+    //FC,APの演出オブジェクト
+    [SerializeField] GameObject FCtext, APtext;
+    //SceneChange
+    [SerializeField] SceneChange sceneChange;
 
     //bpm
     float BPM;
     // Start is called before the first frame update
-    void Start()
+    async void Start()
     {
         //AudioSorceを取得
         myAudioSorce = GetComponent<AudioSource>();
-        Setting.NoteSpeed = 3f;
+        SettingManager.NoteSpeed = 3f;
+        //曲をロード
+        var musicHandle = Addressables.LoadAssetAsync<AudioClip>("m_" + musicNum);
+        music = await musicHandle.Task;
+        Addressables.Release(musicHandle);
+        myAudioSorce.clip = music;
         //CSVをロード
-        LoadCSV();
-        BPM = float.Parse(notes[0][3]) * myAudioSorce.pitch;
-        //生成順に並び変え
-        ArrageTiming();
-        //deltaを初期化
-        delta = NoteTimings[NoteIndex][1];
-        myAudioSorce.time = (delta) * myAudioSorce.pitch;
-        //コンボ、スコア、リザルトを初期化
-        Combo = 0;
-        Combo_type = 0;
-        Score = 0;
-        result[0] = 0;
-        result[1] = 0;
-        result[2] = 0;
+         LoadCSV();
     }
 
-    float delta = 0;
+    float delta;
     public int NoteIndex = 0;
     bool isMusicPlay = false;
     // Update is called once per frame
@@ -65,30 +67,49 @@ public class NotesGenerator : MonoBehaviour
     {
         delta += Time.deltaTime;
         //いい感じに生成
-        if (delta > NoteTimings[NoteIndex][1])
+        if (NoteIndex < notes.Count - 1 || !isMusicPlay)
         {
-            if (notes[(int)NoteTimings[NoteIndex][0]][0] == "0")
+            if (delta > NoteTimings[NoteIndex][1])
             {
-                NotesSystem newNotes = Instantiate(notesPre.GetComponent<NotesSystem>(), new Vector2(float.Parse(notes[(int)NoteTimings[NoteIndex][0]][1]), float.Parse(notes[(int)NoteTimings[NoteIndex][0]][2])), Quaternion.identity, transform);
-                newNotes.HighSpeed = float.Parse(notes[(int)NoteTimings[NoteIndex][0]][5]);
+                if (notes[(int)NoteTimings[NoteIndex][0]][0] == "0")
+                {
+                    NotesSystem newNotes = Instantiate(notesPre.GetComponent<NotesSystem>(), new Vector2(float.Parse(notes[(int)NoteTimings[NoteIndex][0]][1]), float.Parse(notes[(int)NoteTimings[NoteIndex][0]][2])), Quaternion.identity, transform);
+                    newNotes.HighSpeed = float.Parse(notes[(int)NoteTimings[NoteIndex][0]][5]);
+                }
+                NoteIndex++;
             }
-            NoteIndex++;
+            //deltaが0になったら曲を再生
+            if (delta > 0 && !isMusicPlay)
+            {
+                myAudioSorce.Play();
+                isMusicPlay = true;
+            }
+            //最大コンボ数を更新
+            if (Combo >= BestCombo)
+            {
+                BestCombo = Combo;
+            }
         }
-        //deltaが0になったら曲を再生
-        if(delta > 0 && !isMusicPlay)
+        else
         {
-            myAudioSorce.Play();
-            isMusicPlay = true;
-        }
-        //最大コンボ数を更新
-        if (Combo >= BestCombo)
-        {
-            BestCombo = Combo;
-        }
-        //最後になったらデバッグ
-        if(delta > NoteTimings[NoteTimings.Count - 1][1] + Setting.GoodRange)
-        {
-            
+            //最後になったら演出を表示後シーン転移
+            if (!myAudioSorce.isPlaying)
+            {
+                //ミスが0
+                if (result[2] == 0)
+                {
+                    //グレによって演出を変える
+                    if (result[1] == 0)
+                    {
+                        APtext.SetActive(true);
+                    }
+                    else
+                    {
+                        APtext.SetActive(false);
+                    }
+                    sceneChange.StartCoroutine(sceneChange.LoadScene(3, "Result"));
+                }
+            }
         }
     }
 
@@ -98,10 +119,12 @@ public class NotesGenerator : MonoBehaviour
     /// 一行目:曲タイトル,作曲者など("作曲:～～"のように書く),難易度,BPM,コンボ数
     /// それ以降:BPM変化用のノーツか否か(0or1で),ノーツのx座標,y座標,前のノーツとの間隔分子,分母(ex 16分なら1,16 同時なら 0,1),ハイスピ(一つ目が1なら変化先のBPMをば)
     /// </summary>
-    void LoadCSV()
+    async void LoadCSV()
     {
         //CSVの中身を格納、StringReaderに変換
-        TextAsset scoreCSV = Resources.Load(scorePass) as TextAsset;
+        var csvHandle = Addressables.LoadAssetAsync<TextAsset>("s_" + musicNum + "_" + difficulty.ToString());
+        TextAsset scoreCSV = await csvHandle.Task;
+        Addressables.Release(csvHandle);
         StringReader reader = new StringReader(scoreCSV.text);
         //読み取る
         while(reader.Peek() != -1)
@@ -109,12 +132,16 @@ public class NotesGenerator : MonoBehaviour
             string line = reader.ReadLine();
             notes.Add(line.Split(','));
         }
+        //生成順に並び変え
+        ArrageTiming();
     }
     //ノーツを生成順にする
     void ArrageTiming()
     {
         //生成時間を計算し、配列にぶち込む
         float totalTime = 0;
+
+        BPM = float.Parse(notes[0][3]) * myAudioSorce.pitch;
 
         //BPMを仮置き
         float tempBPM = BPM;
@@ -131,7 +158,7 @@ public class NotesGenerator : MonoBehaviour
             }
             else
             {
-                temp[1] = totalTime - 1 / (Setting.NoteSpeed * float.Parse(notes[i][5]));
+                temp[1] = totalTime - 1 / (SettingManager.NoteSpeed * float.Parse(notes[i][5]));
             }
             NoteTimings.Add(temp);
         }
@@ -139,5 +166,16 @@ public class NotesGenerator : MonoBehaviour
         float[][] TimingsArray = NoteTimings.ToArray();
         Array.Sort(TimingsArray, ( a, b) => a[1] > b[1] ? 1 : -1);
         NoteTimings = TimingsArray.ToList();
+
+
+        //deltaを初期化
+        delta = NoteTimings[0][1] - 7;
+        //コンボ、スコア、リザルトを初期化
+        Combo = 0;
+        Combo_type = 0;
+        Score = 0;
+        result[0] = 0;
+        result[1] = 0;
+        result[2] = 0;
     }
 }
