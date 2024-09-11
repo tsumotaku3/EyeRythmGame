@@ -74,7 +74,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 0f135e781d11cc14f938b151404b4290, type: 3}
-  m_Color: {r: 1, g: 0.90984917, b: 0.5226415, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -161,7 +161,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
-  m_Color: {r: 1, g: 0.6658418, b: 0, a: 0.49803922}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.49803922}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -191,7 +191,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 2b985e70984f8e44c806f9cc24cc1398, type: 3}
   - {fileID: 21300000, guid: cd94df62f648eaf468e545f9765f5c2d, type: 3}
   judgeText: {fileID: 4548580649189151864, guid: 1b3c7a5d6ed45514a93a11aa8bb64d9b, type: 3}
-  HighSpeed: 0
+  HighSpeed: 1
   SuccessSE: {fileID: 8300000, guid: 36a6b387891d721448af82ef9ac0c860, type: 3}
 --- !u!95 &7641992397448584350
 Animator:

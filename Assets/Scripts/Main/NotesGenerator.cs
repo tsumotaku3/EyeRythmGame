@@ -49,7 +49,6 @@ public class NotesGenerator : MonoBehaviour
     {
         //AudioSorceÇéÊìæ
         myAudioSorce = GetComponent<AudioSource>();
-        SettingManager.NoteSpeed = 3f;
         //ã»ÇÉçÅ[Éh
         var musicHandle = Addressables.LoadAssetAsync<AudioClip>("m_" + musicNum);
         music = await musicHandle.Task;
@@ -107,8 +106,8 @@ public class NotesGenerator : MonoBehaviour
                     {
                         APtext.SetActive(false);
                     }
-                    sceneChange.StartCoroutine(sceneChange.LoadScene(3, "Result"));
                 }
+                sceneChange.StartCoroutine(sceneChange.LoadScene(3, "Result"));
             }
         }
     }
@@ -158,7 +157,7 @@ public class NotesGenerator : MonoBehaviour
             }
             else
             {
-                temp[1] = totalTime - 1 / (SettingManager.NoteSpeed * float.Parse(notes[i][5]));
+                temp[1] = totalTime - 1 / (SettingManager.NoteSpeed * (float.Parse(notes[i][5]) - SettingManager.MusicOffset / 10));
             }
             NoteTimings.Add(temp);
         }
