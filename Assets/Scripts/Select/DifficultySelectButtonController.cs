@@ -16,8 +16,8 @@ public class DifficultySelectButtonController : MonoBehaviour
 
     }
 
-    public void OnClick(int level)
+    public void OnClick(int difficulty)
     {
-        NotesGenerator.difficulty = level;
+        NotesGenerator.difficulty = difficulty;
     }
 }

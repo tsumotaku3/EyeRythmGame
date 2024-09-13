@@ -48,15 +48,13 @@ public class SelectButtonGenerator : MonoBehaviour
                 var jacketHandle = Addressables.LoadAssetAsync<Sprite>("j_" + i.ToString("d3"));
                 var spr = await jacketHandle.Task;
                 Jackets.Add(spr);
-                Addressables.Release(jacketHandle);
             }
         }
         //CSV‚ğ‚à‚Æ‚Éƒ{ƒ^ƒ“‚ğ¶¬
         for (int i = 0; i < MusicList.Count; i++)
         {
-            SeleceButtonController obj = Instantiate(buttonPre);
+            SeleceButtonController obj = Instantiate(buttonPre,contentsParent.transform);
             obj.MusicNumber = i + 1;
-            obj.transform.parent = contentsParent.transform;
         }
     }
 }

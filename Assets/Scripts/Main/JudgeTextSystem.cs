@@ -8,11 +8,11 @@ public class JudgeTextSystem : MonoBehaviour
     //AudioSorce‚Æƒm[ƒc‰¹
     AudioSource[] audioSources;
     public AudioClip[] NoteSE = new AudioClip[2];
-
     private void Start()
     {
         transform.GetChild(NotesGenerator.Combo_type).gameObject.SetActive(true);
         transform.GetChild(NotesGenerator.Combo_type).gameObject.GetComponent<TextMeshPro>().text = NotesGenerator.Combo.ToString();
+        GetComponent<Animator>().speed = 1 / SettingManager.JudgeSpeed;
     }
 
     //‰¹‚ğ–Â‚ç‚·ŠÖ”

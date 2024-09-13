@@ -34,9 +34,9 @@ public class SettingManager : MonoBehaviour
     void LoadData()
     {
         //ファイルが無ければ初期値に設定
-        if (!FileAccess.Exists("SaveData"))
+        if (QuickSaveRaw.Exists("SaveData"))
         {
-            NoteSpeed = 3;
+            NoteSpeed = 1;
             JudgeOffset = 0;
             MusicOffset = 0;
             NoteSize = 1;

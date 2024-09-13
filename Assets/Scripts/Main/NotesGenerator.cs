@@ -33,12 +33,18 @@ public class NotesGenerator : MonoBehaviour
     List<float[]> NoteTimings = new List<float[]>();
 
     //AudioSorce
-    AudioSource myAudioSorce;
+    AudioSource myAudioSource;
     //曲
-    AudioClip music;
+    public static AudioClip music;
 
     //FC,APの演出オブジェクト
     [SerializeField] GameObject FCtext, APtext;
+    //SEController
+    [SerializeField]
+    SEController SEController;
+    //AP,FC のSE
+    [SerializeField]
+    AudioClip[] eventClip = new AudioClip[2];
     //SceneChange
     [SerializeField] SceneChange sceneChange;
 
@@ -48,12 +54,11 @@ public class NotesGenerator : MonoBehaviour
     async void Start()
     {
         //AudioSorceを取得
-        myAudioSorce = GetComponent<AudioSource>();
+        myAudioSource = GetComponent<AudioSource>();
         //曲をロード
         var musicHandle = Addressables.LoadAssetAsync<AudioClip>("m_" + musicNum);
         music = await musicHandle.Task;
-        Addressables.Release(musicHandle);
-        myAudioSorce.clip = music;
+        myAudioSource.clip = music;
         //CSVをロード
          LoadCSV();
     }
@@ -61,6 +66,7 @@ public class NotesGenerator : MonoBehaviour
     float delta;
     public int NoteIndex = 0;
     bool isMusicPlay = false;
+    bool isfinish = false;
     // Update is called once per frame
     void Update()
     {
@@ -80,7 +86,7 @@ public class NotesGenerator : MonoBehaviour
             //deltaが0になったら曲を再生
             if (delta > 0 && !isMusicPlay)
             {
-                myAudioSorce.Play();
+                myAudioSource.Play();
                 isMusicPlay = true;
             }
             //最大コンボ数を更新
@@ -92,21 +98,25 @@ public class NotesGenerator : MonoBehaviour
         else
         {
             //最後になったら演出を表示後シーン転移
-            if (!myAudioSorce.isPlaying)
+            if (!myAudioSource.isPlaying && !isfinish)
             {
+                Addressables.Release("m_" + musicNum);
                 //ミスが0
                 if (result[2] == 0)
                 {
                     //グレによって演出を変える
                     if (result[1] == 0)
                     {
+                        SEController.OnClick(eventClip[0]);
                         APtext.SetActive(true);
                     }
                     else
                     {
-                        APtext.SetActive(false);
+                        SEController.OnClick(eventClip[1]);
+                        FCtext.SetActive(true);
                     }
                 }
+                isfinish = true;
                 sceneChange.StartCoroutine(sceneChange.LoadScene(3, "Result"));
             }
         }
@@ -138,9 +148,9 @@ public class NotesGenerator : MonoBehaviour
     void ArrageTiming()
     {
         //生成時間を計算し、配列にぶち込む
-        float totalTime = 0;
+        float totalTime = -SettingManager.MusicOffset / 10;
 
-        BPM = float.Parse(notes[0][3]) * myAudioSorce.pitch;
+        BPM = float.Parse(notes[0][3]) * myAudioSource.pitch;
 
         //BPMを仮置き
         float tempBPM = BPM;
@@ -157,7 +167,7 @@ public class NotesGenerator : MonoBehaviour
             }
             else
             {
-                temp[1] = totalTime - 1 / (SettingManager.NoteSpeed * (float.Parse(notes[i][5]) - SettingManager.MusicOffset / 10));
+                temp[1] = totalTime - 1 / (SettingManager.NoteSpeed * float.Parse(notes[i][5]));
             }
             NoteTimings.Add(temp);
         }

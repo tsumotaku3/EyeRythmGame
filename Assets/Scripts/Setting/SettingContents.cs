@@ -37,7 +37,7 @@ public class SettingContents : MonoBehaviour
                 break;
             case "JudgeSpeed":
                 mySlider.value = SettingManager.JudgeSpeed * 10;
-                v_text.text = SettingManager.JudgeSpeed.ToString("f1");
+                v_text.text = SettingManager.JudgeSpeed.ToString("f1") + "s";
                 break;
             case "sys_BGM":
                 mySlider.value = SettingManager.sys_BGM + 80;
@@ -105,7 +105,7 @@ public class SettingContents : MonoBehaviour
                 break;
             case "JudgeSpeed":
                 SettingManager.JudgeSpeed = mySlider.value / 10;
-                v_text.text = SettingManager.JudgeSpeed.ToString("f1");
+                v_text.text = SettingManager.JudgeSpeed.ToString("f1") + "s";
                 break;
             case "sys_BGM":
                 SettingManager.sys_BGM = mySlider.value - 80;
