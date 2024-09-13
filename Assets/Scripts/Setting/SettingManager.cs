@@ -34,7 +34,7 @@ public class SettingManager : MonoBehaviour
     void LoadData()
     {
         //ファイルが無ければ初期値に設定
-        if (QuickSaveRaw.Exists("SaveData"))
+        if (!QuickSaveBase.RootExists("SaveData"))
         {
             NoteSpeed = 1;
             JudgeOffset = 0;
